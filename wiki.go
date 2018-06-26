@@ -8,16 +8,26 @@ import (
 	"regexp"
 )
 
+// Defining the data structures
 type Page struct {
 	Title string
-	Body  []byte
+	Body  []byte // "a byte slice
 }
 
+
+// This is a method named save that takes as its receiver p, a pointer to Page.
+// It takes no parameters, and returns a value of type error.
+// Save method returns an error value because that is the return type of WriteFile
 func (p *Page) save() error {
 	filename := p.Title + ".txt"
+	// The octal integer literal 0600, passed as the third parameter to WriteFile,
+	// indicates that the file should be created with read-write permissions for the current user only
 	return ioutil.WriteFile(filename, p.Body, 0600)
 }
 
+// loadPage constructs the file name from the title parameter,
+// reads the file's contents into a new variable body,
+// and returns a pointer to a Page literal constructed with the proper title and body values.
 func loadPage(title string) (*Page, error) {
 	filename := title + ".txt"
 	body, err := ioutil.ReadFile(filename)
@@ -55,6 +65,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
+// we create a global variable named templates, and initialize it with ParseFiles
 var templates = template.Must(template.ParseFiles("edit.html", "view.html"))
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
@@ -64,6 +75,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 	}
 }
 
+// create a global variable to store our validation expression
 var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
